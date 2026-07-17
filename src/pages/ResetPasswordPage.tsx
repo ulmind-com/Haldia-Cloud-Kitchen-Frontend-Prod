@@ -9,6 +9,20 @@ import { Eye, EyeOff, Lock, CheckCircle2, AlertTriangle } from "lucide-react";
 const inputClass =
   "w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20";
 
+// Defined at module scope so it isn't recreated on every render
+// (recreating it remounts the inputs and drops focus on each keystroke).
+const Card = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background to-muted px-4">
+    <motion.div
+      initial={{ scale: 0.96, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      className="w-full max-w-md rounded-3xl border border-border bg-card p-8 shadow-2xl sm:p-10"
+    >
+      {children}
+    </motion.div>
+  </div>
+);
+
 const ResetPasswordPage = () => {
   const [params] = useSearchParams();
   const token = params.get("token") || "";
@@ -42,18 +56,6 @@ const ResetPasswordPage = () => {
       setLoading(false);
     }
   };
-
-  const Card = ({ children }: { children: React.ReactNode }) => (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background to-muted px-4">
-      <motion.div
-        initial={{ scale: 0.96, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-md rounded-3xl border border-border bg-card p-8 shadow-2xl sm:p-10"
-      >
-        {children}
-      </motion.div>
-    </div>
-  );
 
   // Missing / invalid token
   if (!token) {
