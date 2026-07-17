@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { io } from "socket.io-client";
+import { API_URL } from "@/lib/config";
 import {
     ArrowLeft, ShoppingBag, CheckCircle, ChefHat, Bike,
     XCircle, Clock, MapPin, CreditCard, Package, RefreshCw,
@@ -574,7 +575,7 @@ const OrderTracking = () => {
 
     useEffect(() => {
         if (!id) return;
-        const socket = io("https://food-delivery-app-backend-2ifj.onrender.com", { transports: ["websocket", "polling"] });
+        const socket = io(API_URL, { transports: ["websocket", "polling"] });
         socket.emit("joinOrder", id);
         socket.on("orderStatusUpdated", (data: { orderId: string; status: string }) => {
             if (data.status) {

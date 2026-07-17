@@ -1,4 +1,6 @@
-const API_BASE_URL = "https://food-delivery-app-backend-2ifj.onrender.com";
+import { API_URL } from "@/lib/config";
+
+const API_BASE_URL = API_URL;
 
 /**
  * Resolves an image URL — prepends the API base if the URL is relative,

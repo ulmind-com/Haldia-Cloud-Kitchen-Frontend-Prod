@@ -1,6 +1,7 @@
 import { io } from "socket.io-client";
+import { API_URL } from "@/lib/config";
 
-const SOCKET_URL = "https://food-delivery-backend-173b.onrender.com";
+const SOCKET_URL = API_URL;
 
 export const socket = io(SOCKET_URL, {
   transports: ["websocket"],

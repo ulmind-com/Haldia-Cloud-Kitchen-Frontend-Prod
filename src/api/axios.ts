@@ -1,7 +1,8 @@
 import axios from "axios";
 import { toast } from "sonner";
+import { API_URL } from "@/lib/config";
 
-const API_BASE_URL = "https://food-delivery-backend-173b.onrender.com/api";
+const API_BASE_URL = `${API_URL}/api`;
 
 const api = axios.create({
   baseURL: API_BASE_URL,

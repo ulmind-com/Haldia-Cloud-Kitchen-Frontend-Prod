@@ -6,8 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { X, Send, MessageCircle, RefreshCw, CheckCheck, ChevronDown, ImagePlus, XCircle } from "lucide-react";
 import { playChatSound } from "@/lib/notification-sound";
+import { API_URL } from "@/lib/config";
 
-const SOCKET_URL = "https://food-delivery-app-backend-2ifj.onrender.com";
+const SOCKET_URL = API_URL;
 
 interface Message {
     _id: string;
