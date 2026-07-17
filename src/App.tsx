@@ -13,6 +13,7 @@ import CheckoutPage from "./pages/CheckoutPage";
 import MyOrders from "./pages/MyOrders";
 import AddressesPage from "./pages/AddressesPage";
 import OrderTracking from "./pages/OrderTracking";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import Navbar from "./components/Navbar";
 import CartDrawer from "./components/CartDrawer";
 import CartBar from "./components/CartBar";
@@ -160,6 +161,7 @@ const AppContent = () => {
       <CustomerChatDrawer isOpen={chatOpen} onClose={() => setChatOpen(false)} />
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route
           path="/profile"
           element={

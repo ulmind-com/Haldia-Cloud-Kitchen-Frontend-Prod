@@ -44,8 +44,14 @@ export default api;
 // ─── Auth ───────────────────────────────────
 export const authApi = {
   login: (data: { email: string; password: string }) => api.post("/auth/login", data),
-  register: (data: { name: string; email: string; password: string; mobile: string; address?: object }) =>
+  register: (data: { name: string; email: string; password: string; mobile: string; signupToken: string; address?: object }) =>
     api.post("/auth/register", data),
+  // OTP-verified signup
+  sendOtp: (data: { email: string }) => api.post("/auth/send-otp", data),
+  verifyOtp: (data: { email: string; otp: string }) => api.post("/auth/verify-otp", data),
+  // Forgot / reset password
+  forgotPassword: (data: { email: string }) => api.post("/auth/forgot-password", data),
+  resetPassword: (data: { token: string; password: string }) => api.post("/auth/reset-password", data),
 };
 
 // ─── User ───────────────────────────────────
