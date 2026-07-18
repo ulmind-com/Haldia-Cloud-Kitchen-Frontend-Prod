@@ -35,6 +35,12 @@ const PosReports = () => {
     queryFn: async () => (await posApi.getReport(range)).data,
   });
 
+  const generate = async () => {
+    const res = await refetch();
+    const r = res.data;
+    if (r) toast.success(`Report ready · ${r.offline.billCount} offline bill(s)`);
+  };
+
   const sendEmail = async () => {
     if (!email) { toast.error("Enter a recipient email"); return; }
     setSending(true);
@@ -72,7 +78,7 @@ const PosReports = () => {
           <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">To</label>
           <input type="date" value={to} min={from} max={todayStr()} onChange={(e) => setTo(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
         </div>
-        <button onClick={() => refetch()} className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:brightness-110">
+        <button onClick={generate} disabled={isFetching} className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:brightness-110 disabled:opacity-60">
           {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <BarChart3 className="h-4 w-4" />} Generate
         </button>
         <div className="ml-auto flex items-end gap-2">
