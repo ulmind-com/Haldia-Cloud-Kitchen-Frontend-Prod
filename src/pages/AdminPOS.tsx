@@ -61,7 +61,7 @@ export default function AdminPOS() {
         }
     });
 
-    const restName = restaurant?.name || "FOODIE DELIGHT";
+    const restName = restaurant?.name || "HALDIA CLOUD KITCHEN & RESTAURANT";
     const restAddress = restaurant?.address || "123 Tasty Street, Sector 4, Food City, FC 450001";
     const restPhone = restaurant?.mobile || "+91 98765 43210";
     const restGst = restaurant?.gstIn || "22AAAAA0000A1Z5";

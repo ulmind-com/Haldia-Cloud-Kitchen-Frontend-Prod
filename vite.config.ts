@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     mode === "production" && VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.ico", "icons/icon-192.png", "icons/icon-512.png"],
+      includeAssets: ["favicon.ico", "icons/favicon.png"],
       manifest: {
         name: "Haldia Cloud Kitchen & Restaurant",
         short_name: "Haldia Cloud Kitchen",
@@ -34,13 +34,13 @@ export default defineConfig(({ mode }) => ({
         start_url: "/",
         icons: [
           {
-            src: "/icons/icon-192.png",
+            src: "/icons/favicon.png",
             sizes: "192x192",
             type: "image/png",
             purpose: "any maskable",
           },
           {
-            src: "/icons/icon-512.png",
+            src: "/icons/favicon.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "any maskable",

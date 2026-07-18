@@ -360,7 +360,7 @@ const AdminOrders = () => {
         doc.setGState(new (doc as any).GState({ opacity: 0.05 }));
         doc.setFontSize(50);
         doc.setTextColor(150);
-        doc.text(restaurant?.name || "FOODIE DELIGHT", pageWidth / 2, pageHeight / 2, { align: "center", angle: 45 as any });
+        doc.text(restaurant?.name || "HALDIA CLOUD KITCHEN & RESTAURANT", pageWidth / 2, pageHeight / 2, { align: "center", angle: 45 as any });
         doc.setGState(new (doc as any).GState({ opacity: 1 }));
       }
     } catch (err) {

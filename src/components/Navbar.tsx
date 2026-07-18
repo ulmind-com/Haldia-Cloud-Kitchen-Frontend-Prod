@@ -93,7 +93,7 @@ const Navbar = () => {
               </div>
             )}
             <span className="truncate text-lg font-extrabold tracking-tight text-foreground">
-              {restaurant?.name || "Foodie"}
+              {restaurant?.name || "Haldia Cloud Kitchen & Restaurant"}
             </span>
           </Link>
         )}

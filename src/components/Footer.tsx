@@ -36,7 +36,7 @@ const Footer = () => {
                                 className="text-xl font-extrabold tracking-tight text-foreground"
                                 style={{ fontFamily: "'Playfair Display', serif" }}
                             >
-                                {restaurant?.name ?? "Foodie Delight"}
+                                {restaurant?.name ?? "Haldia Cloud Kitchen & Restaurant"}
                             </span>
                         </div>
                         {restaurant?.address && (
@@ -83,7 +83,7 @@ const Footer = () => {
                 {/* Bottom row */}
                 <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
                     <p className="text-xs text-muted-foreground">
-                        © {year} {restaurant?.name ?? "Foodie Delight"}. All rights reserved.
+                        © {year} {restaurant?.name ?? "Haldia Cloud Kitchen & Restaurant"}. All rights reserved.
                     </p>
 
                     {/* ULMiND credit */}
