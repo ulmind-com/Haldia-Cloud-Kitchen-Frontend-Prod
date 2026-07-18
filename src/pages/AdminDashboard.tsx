@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 import {
   LayoutDashboard, UtensilsCrossed, Layers, ClipboardList, BarChart3,
   DollarSign, ShoppingBag, TrendingUp, Package, Plus, Menu, X, Settings, Tag, Users,
-  PieChart as PieChartIcon, MessageSquare, Printer, Map as MapIcon, Film, Grid3x3, ChefHat,
+  PieChart as PieChartIcon, MessageSquare, Printer, Map as MapIcon, Film, Grid3x3, ChefHat, Wallet,
 } from "lucide-react";
 import AdminMenuTable from "@/components/AdminMenuTable";
 import CategoryManager from "@/components/CategoryManager";
@@ -23,20 +23,22 @@ import AdminReviews from "@/components/AdminReviews";
 import AdminChat from "@/components/AdminChat";
 import HeroVideoManager from "@/components/HeroVideoManager";
 import AdminMapAnalytics from "@/components/AdminMapAnalytics";
-import AdminPOS from "./AdminPOS";
 import TableManagement from "@/components/TableManagement";
 import KotTerminal from "@/components/KotTerminal";
+import PosBilling from "@/components/PosBilling";
+import PosSettlement from "@/components/PosSettlement";
 import AdminVlogs from "@/components/AdminVlogs";
 
-type AdminTab = "dashboard" | "menu" | "categories" | "orders" | "analytics" | "map" | "coupons" | "settings" | "users" | "reviews" | "chat" | "videos" | "billing" | "vlogs" | "tables" | "kot";
+type AdminTab = "dashboard" | "menu" | "categories" | "orders" | "analytics" | "map" | "coupons" | "settings" | "users" | "reviews" | "chat" | "videos" | "billing" | "vlogs" | "tables" | "kot" | "settlement";
 
-const VALID_TABS: AdminTab[] = ["dashboard", "menu", "categories", "orders", "analytics", "map", "coupons", "settings", "users", "reviews", "chat", "videos", "billing", "vlogs", "tables", "kot"];
+const VALID_TABS: AdminTab[] = ["dashboard", "menu", "categories", "orders", "analytics", "map", "coupons", "settings", "users", "reviews", "chat", "videos", "billing", "vlogs", "tables", "kot", "settlement"];
 
 const sidebarLinks: { key: AdminTab; label: string; icon: any }[] = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { key: "billing", label: "POS Billing", icon: Printer },
   { key: "tables", label: "Tables", icon: Grid3x3 },
   { key: "kot", label: "KOT", icon: ChefHat },
+  { key: "settlement", label: "Settlement", icon: Wallet },
   { key: "analytics", label: "Analytics", icon: BarChart3 },
   { key: "map", label: "Map Analytics", icon: MapIcon },
   { key: "reviews", label: "Reviews", icon: MessageSquare }, // New Reviews Tab
@@ -221,7 +223,9 @@ const AdminDashboard = () => {
       case "videos":
         return <HeroVideoManager />;
       case "billing":
-        return <AdminPOS />;
+        return <PosBilling />;
+      case "settlement":
+        return <PosSettlement />;
       case "tables":
         return <TableManagement />;
       case "kot":

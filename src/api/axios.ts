@@ -285,4 +285,12 @@ export const posApi = {
   updateKot: (id: string, data: { items: { product: string; variant?: string; quantity: number }[]; notes?: string }) =>
     api.put(`/pos/kots/${id}`, data),
   deleteKot: (id: string) => api.delete(`/pos/kots/${id}`),
+
+  // Bills (generate + settlement)
+  generateBill: (data: { tableId: string; kotIds?: string[]; discountType?: "NONE" | "FLAT" | "PERCENTAGE"; discountValue?: number }) =>
+    api.post("/pos/bills", data),
+  getBills: (params?: { status?: string; from?: string; to?: string }) => api.get("/pos/bills", { params }),
+  getBill: (id: string) => api.get(`/pos/bills/${id}`),
+  settleBill: (id: string, data: { paymentMethod: "CASH" | "UPI" | "CARD"; customerName?: string; customerPhone?: string }) =>
+    api.put(`/pos/bills/${id}/settle`, data),
 };
