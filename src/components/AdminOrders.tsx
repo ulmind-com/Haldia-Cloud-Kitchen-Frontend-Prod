@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { chimeNewOrder } from "@/lib/notification-sound";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminApi } from "@/api/axios";
 import { toast } from "sonner";
@@ -77,7 +78,27 @@ const AdminOrders = () => {
       if (filterStatus === "ALL") return adminApi.getOrders().then((r) => r.data?.orders || r.data || []);
       return adminApi.getOrdersByStatus(filterStatus).then((r) => r.data?.orders || r.data || []);
     },
+    // Safety net: auto-refresh even if the socket drops a broadcast (Render can
+    // silently drop idle websockets), so orders never require a manual refresh.
+    refetchInterval: 15000,
+    refetchIntervalInBackground: true,
   });
+
+  // Play the new-order sound when a genuinely new order appears (works whether
+  // the update came from the socket or the polling safety net).
+  const seenTopOrderId = useRef<string | null>(null);
+  useEffect(() => {
+    const topId = orders?.[0]?._id || null;
+    if (!topId) return;
+    if (seenTopOrderId.current === null) {
+      seenTopOrderId.current = topId; // first load — don't chime
+      return;
+    }
+    if (topId !== seenTopOrderId.current) {
+      seenTopOrderId.current = topId;
+      chimeNewOrder(topId);
+    }
+  }, [orders]);
 
   // Real-time updates for Admin
   useEffect(() => {
@@ -88,11 +109,13 @@ const AdminOrders = () => {
     socket.on("adminOrderUpdated", handleUpdate);
     socket.on("adminRefundUpdated", handleUpdate);
     socket.on("newOrder", handleUpdate);
+    socket.on("connect", handleUpdate); // catch up after a reconnect
 
     return () => {
       socket.off("adminOrderUpdated", handleUpdate);
       socket.off("adminRefundUpdated", handleUpdate);
       socket.off("newOrder", handleUpdate);
+      socket.off("connect", handleUpdate);
     };
   }, [queryClient]);
 

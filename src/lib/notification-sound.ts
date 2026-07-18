@@ -1,3 +1,12 @@
+// De-duplicated new-order chime: the same order id won't chime twice even if
+// both the socket handler and the polling detector fire for it.
+let lastChimedOrderId: string | null = null;
+export function chimeNewOrder(orderId?: string | null) {
+    if (orderId && orderId === lastChimedOrderId) return;
+    lastChimedOrderId = orderId || null;
+    playNewOrderSound();
+}
+
 /**
  * Plays a pleasant "new order" notification sound using the Web Audio API.
  * No external audio files required.

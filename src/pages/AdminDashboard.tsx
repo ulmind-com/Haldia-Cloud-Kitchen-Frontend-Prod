@@ -5,7 +5,7 @@ import { adminApi, chatApi } from "@/api/axios";
 import { useAuthStore } from "@/store/useAuthStore";
 import { toast } from "sonner";
 import { socket } from "@/api/socket";
-import { playNewOrderSound, playChatSound } from "@/lib/notification-sound";
+import { chimeNewOrder, playChatSound } from "@/lib/notification-sound";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard, UtensilsCrossed, Layers, ClipboardList, BarChart3,
@@ -84,7 +84,7 @@ const AdminDashboard = () => {
     socket.emit("joinAdminChat");
 
     socket.on("newOrder", (data: any) => {
-      playNewOrderSound();
+      chimeNewOrder(data?._id || data?.orderId || data?.customId);
       toast.info(`🛎️ New Order: ${data.orderId || data.customId || "Incoming!"}`, {
         duration: 8000,
         description: "A new order has been placed. Check the orders list.",
