@@ -276,4 +276,13 @@ export const posApi = {
   deleteTable: (id: string) => api.delete(`/pos/tables/${id}`),
   setTableStatus: (id: string, status: "available" | "occupied" | "dirty") =>
     api.put(`/pos/tables/${id}/status`, { status }),
+
+  // KOT (Kitchen Order Tickets)
+  getKots: (params?: { status?: string; table?: string }) => api.get("/pos/kots", { params }),
+  getKot: (id: string) => api.get(`/pos/kots/${id}`),
+  createKot: (data: { tableId: string; items: { product: string; variant?: string; quantity: number }[]; notes?: string }) =>
+    api.post("/pos/kots", data),
+  updateKot: (id: string, data: { items: { product: string; variant?: string; quantity: number }[]; notes?: string }) =>
+    api.put(`/pos/kots/${id}`, data),
+  deleteKot: (id: string) => api.delete(`/pos/kots/${id}`),
 };
