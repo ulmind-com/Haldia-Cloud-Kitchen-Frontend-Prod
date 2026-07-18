@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { adminApi, chatApi } from "@/api/axios";
@@ -66,6 +66,13 @@ const AdminDashboard = () => {
   const queryClient = useQueryClient();
   const { isAdmin } = useAuthStore();
   const visibleLinks = sidebarLinks.filter((l) => isAdmin() || !ADMIN_ONLY_TABS.includes(l.key));
+
+  // ── Global new-order notifier (works on ANY admin tab) ──
+  // De-duplicated across the socket (instant) and the dashboard polling
+  // safety net, so an order chimes + pops once even if both fire.
+  const lastNotifiedOrderRef = useRef<string | null>(null);
+  const notifierInitializedRef = useRef(false);
+  const handleIncomingOrderRef = useRef<(order: any) => void>(() => {});
   const [searchParams, setSearchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab") as AdminTab | null;
   const activeTab: AdminTab = tabFromUrl && VALID_TABS.includes(tabFromUrl) ? tabFromUrl : "dashboard";
@@ -84,11 +91,7 @@ const AdminDashboard = () => {
     socket.emit("joinAdminChat");
 
     socket.on("newOrder", (data: any) => {
-      chimeNewOrder(data?._id || data?.orderId || data?.customId);
-      toast.info(`🛎️ New Order: ${data.orderId || data.customId || "Incoming!"}`, {
-        duration: 8000,
-        description: "A new order has been placed. Check the orders list.",
-      });
+      handleIncomingOrderRef.current(data);
       queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
       queryClient.invalidateQueries({ queryKey: ["admin-dashboard"] });
     });
@@ -137,7 +140,40 @@ const AdminDashboard = () => {
   const { data: stats, isLoading } = useQuery({
     queryKey: ["admin-dashboard"],
     queryFn: () => adminApi.getDashboard().then((r) => r.data),
+    // Poll globally so new orders are caught on ANY tab even if the socket
+    // dropped the broadcast — keeps the chime + popup reliable everywhere.
+    refetchInterval: 20000,
+    refetchIntervalInBackground: true,
   });
+
+  // Keep the notifier closure fresh (latest setActiveTab) without re-running effects.
+  handleIncomingOrderRef.current = (order: any) => {
+    const id = order?._id || order?.customId;
+    if (!id || id === lastNotifiedOrderRef.current) return;
+    lastNotifiedOrderRef.current = id;
+    chimeNewOrder(id);
+    const name = order?.customer?.name || order?.customerName || "Customer";
+    const amt = order?.finalAmount ?? order?.totalAmount;
+    toast(`🛎️ New order ${order?.customId || ""}`.trim(), {
+      description: `${name}${amt != null ? ` · ₹${amt}` : ""} · ${order?.paymentMethod || "COD"}`,
+      duration: 12000,
+      action: { label: "View orders", onClick: () => setActiveTab("orders") },
+    });
+  };
+
+  // Global polling safety net: detect a new top order from the dashboard feed
+  // on any tab and fire the notifier (deduped against the socket).
+  useEffect(() => {
+    const latest = stats?.recentOrders?.[0];
+    if (!latest) return;
+    const id = latest._id || latest.customId;
+    if (!notifierInitializedRef.current) {
+      notifierInitializedRef.current = true;
+      lastNotifiedOrderRef.current = id; // baseline — don't chime existing orders
+      return;
+    }
+    if (id !== lastNotifiedOrderRef.current) handleIncomingOrderRef.current(latest);
+  }, [stats]);
 
   const renderContent = () => {
     // Managers cannot open admin-only tabs even via a direct URL.
