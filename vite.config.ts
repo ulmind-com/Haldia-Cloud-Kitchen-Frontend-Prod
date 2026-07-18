@@ -23,8 +23,8 @@ export default defineConfig(({ mode }) => ({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "icons/icon-192.png", "icons/icon-512.png"],
       manifest: {
-        name: "Food and Talk Plaza",
-        short_name: "Food & Talk",
+        name: "Haldia Cloud Kitchen & Restaurant",
+        short_name: "Haldia Cloud Kitchen",
         description: "Order fresh, delicious food online. Fast delivery to your doorstep.",
         theme_color: "#f97316",
         background_color: "#ffffff",
