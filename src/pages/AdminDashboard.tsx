@@ -28,11 +28,12 @@ import TableManagement from "@/components/TableManagement";
 import KotTerminal from "@/components/KotTerminal";
 import PosBilling from "@/components/PosBilling";
 import PosSettlement from "@/components/PosSettlement";
+import PosReports from "@/components/PosReports";
 import AdminVlogs from "@/components/AdminVlogs";
 
-type AdminTab = "dashboard" | "menu" | "categories" | "orders" | "analytics" | "map" | "coupons" | "settings" | "users" | "reviews" | "chat" | "videos" | "billing" | "vlogs" | "tables" | "kot" | "settlement";
+type AdminTab = "dashboard" | "menu" | "categories" | "orders" | "analytics" | "map" | "coupons" | "settings" | "users" | "reviews" | "chat" | "videos" | "billing" | "vlogs" | "tables" | "kot" | "settlement" | "reports";
 
-const VALID_TABS: AdminTab[] = ["dashboard", "menu", "categories", "orders", "analytics", "map", "coupons", "settings", "users", "reviews", "chat", "videos", "billing", "vlogs", "tables", "kot", "settlement"];
+const VALID_TABS: AdminTab[] = ["dashboard", "menu", "categories", "orders", "analytics", "map", "coupons", "settings", "users", "reviews", "chat", "videos", "billing", "vlogs", "tables", "kot", "settlement", "reports"];
 
 const sidebarLinks: { key: AdminTab; label: string; icon: any }[] = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -40,6 +41,7 @@ const sidebarLinks: { key: AdminTab; label: string; icon: any }[] = [
   { key: "tables", label: "Tables", icon: Grid3x3 },
   { key: "kot", label: "KOT", icon: ChefHat },
   { key: "settlement", label: "Settlement", icon: Wallet },
+  { key: "reports", label: "Reports", icon: BarChart3 },
   { key: "analytics", label: "Analytics", icon: BarChart3 },
   { key: "map", label: "Map Analytics", icon: MapIcon },
   { key: "reviews", label: "Reviews", icon: MessageSquare }, // New Reviews Tab
@@ -241,6 +243,8 @@ const AdminDashboard = () => {
         return <PosBilling />;
       case "settlement":
         return <PosSettlement />;
+      case "reports":
+        return <PosReports />;
       case "tables":
         return <TableManagement />;
       case "kot":
