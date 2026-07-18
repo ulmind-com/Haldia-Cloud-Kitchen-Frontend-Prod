@@ -29,6 +29,7 @@ import KotTerminal from "@/components/KotTerminal";
 import PosBilling from "@/components/PosBilling";
 import PosSettlement from "@/components/PosSettlement";
 import PosReports from "@/components/PosReports";
+import PosDashboardSummary from "@/components/PosDashboardSummary";
 import AdminVlogs from "@/components/AdminVlogs";
 
 type AdminTab = "dashboard" | "menu" | "categories" | "orders" | "analytics" | "map" | "coupons" | "settings" | "users" | "reviews" | "chat" | "videos" | "billing" | "vlogs" | "tables" | "kot" | "settlement" | "reports";
@@ -187,6 +188,9 @@ const AdminDashboard = () => {
             ) : (
               <DashboardAnalytics />
             )}
+
+            {/* Offline POS (settled bills) — online vs offline split + audit */}
+            <PosDashboardSummary />
           </div>
         );
       case "analytics":
