@@ -59,6 +59,8 @@ export const userApi = {
   getProfile: () => api.get("/users/profile"),
   updateProfile: (data: { name?: string; mobile?: string; address?: string; profileImage?: string }) => api.put("/users/profile", data),
   getAll: (params?: any) => api.get("/users", { params }),
+  createUser: (data: { name: string; email: string; password: string; mobile: string; role: string }) =>
+    api.post("/users", data),
   updateUser: (id: string, data: { role?: string; isActive?: boolean; isCodDisabled?: boolean }) => api.put(`/users/${id}`, data),
   deleteUser: (id: string) => api.delete(`/users/${id}`),
   getAddresses: () => api.get("/users/addresses"),
@@ -293,4 +295,7 @@ export const posApi = {
   getBill: (id: string) => api.get(`/pos/bills/${id}`),
   settleBill: (id: string, data: { paymentMethod: "CASH" | "UPI" | "CARD"; customerName?: string; customerPhone?: string }) =>
     api.put(`/pos/bills/${id}/settle`, data),
+  requestBillDelete: (id: string, reason?: string) => api.post(`/pos/bills/${id}/request-delete`, { reason }),
+  deleteBill: (id: string) => api.delete(`/pos/bills/${id}`),
+  rejectBillDelete: (id: string) => api.put(`/pos/bills/${id}/reject-delete`),
 };

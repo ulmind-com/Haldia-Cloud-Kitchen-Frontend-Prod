@@ -4,20 +4,53 @@ import { posApi } from "@/api/axios";
 import { printBill, BillLike } from "@/lib/posPrint";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { useAuthStore } from "@/store/useAuthStore";
 import { motion } from "framer-motion";
 import {
-  Wallet, Printer, Loader2, CheckCircle2, Banknote, Smartphone, CreditCard, Receipt,
+  Wallet, Printer, Loader2, CheckCircle2, Banknote, Smartphone, CreditCard, Receipt, Trash2, Clock,
 } from "lucide-react";
 
-type Bill = BillLike & { _id: string; settledBy?: { name?: string }; settledAt?: string };
+type Bill = BillLike & {
+  _id: string;
+  settledBy?: { name?: string };
+  settledAt?: string;
+  deleteRequest?: { requestedByName?: string; status?: string; reason?: string };
+};
 
 const money = (n: number) => `₹${(n || 0).toFixed(2)}`;
 const startOfToday = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.toISOString(); };
 
 const PosSettlement = () => {
   const qc = useQueryClient();
+  const { isAdmin } = useAuthStore();
   const [tab, setTab] = useState<"pending" | "history">("pending");
   const [settling, setSettling] = useState<Bill | null>(null);
+
+  const refreshBills = () => {
+    qc.invalidateQueries({ queryKey: ["pos-bills"] });
+    qc.invalidateQueries({ queryKey: ["pos-tables"] });
+  };
+
+  const requestDelete = async (b: Bill) => {
+    const admin = isAdmin();
+    if (!confirm(admin ? `Delete ${b.billNumber}? This cannot be undone.` : `Request deletion of ${b.billNumber}? An admin must approve it.`)) return;
+    try {
+      const res = await posApi.requestBillDelete(b._id);
+      toast.success(res.data.message);
+      refreshBills();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || "Could not process delete");
+    }
+  };
+  const approveDelete = async (b: Bill) => {
+    if (!confirm(`Approve deletion of ${b.billNumber}?`)) return;
+    try { await posApi.deleteBill(b._id); toast.success("Bill deleted"); refreshBills(); }
+    catch (e: any) { toast.error(e?.response?.data?.message || "Could not delete"); }
+  };
+  const rejectDelete = async (b: Bill) => {
+    try { await posApi.rejectBillDelete(b._id); toast.success("Delete request rejected"); refreshBills(); }
+    catch (e: any) { toast.error(e?.response?.data?.message || "Could not reject"); }
+  };
 
   const { data: pending = [], isLoading: pLoading } = useQuery<Bill[]>({
     queryKey: ["pos-bills", "settlement_pending"],
@@ -76,11 +109,25 @@ const PosSettlement = () => {
               {b.status === "settled" && b.settledBy?.name && (
                 <p className="mt-2 text-[11px] text-muted-foreground">Settled by {b.settledBy.name}{b.customerName ? ` · ${b.customerName}` : ""}</p>
               )}
+              {b.deleteRequest?.status === "pending" && (
+                <div className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2 py-1.5 text-[11px] text-amber-700">
+                  <span className="inline-flex items-center gap-1 font-semibold"><Clock className="h-3 w-3" /> Delete requested{b.deleteRequest.requestedByName ? ` by ${b.deleteRequest.requestedByName}` : ""}</span>
+                  {isAdmin() && (
+                    <div className="mt-1.5 flex gap-1.5">
+                      <button onClick={() => approveDelete(b)} className="rounded bg-red-600 px-2 py-1 font-semibold text-white hover:brightness-110">Approve delete</button>
+                      <button onClick={() => rejectDelete(b)} className="rounded border border-border bg-background px-2 py-1 font-semibold">Reject</button>
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="mt-3 flex gap-1.5">
                 {b.status !== "settled" && (
                   <button onClick={() => setSettling(b)} className="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-primary py-1.5 text-xs font-bold text-primary-foreground hover:brightness-110"><Wallet className="h-3.5 w-3.5" /> Settle</button>
                 )}
                 <button onClick={() => printBill(b)} className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg border border-border py-1.5 text-xs font-semibold hover:bg-muted"><Printer className="h-3.5 w-3.5" /> Print</button>
+                {b.deleteRequest?.status !== "pending" && (
+                  <button onClick={() => requestDelete(b)} title={isAdmin() ? "Delete bill" : "Request deletion"} className="inline-flex items-center justify-center rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-500/10"><Trash2 className="h-3.5 w-3.5" /></button>
+                )}
               </div>
             </motion.div>
           ))}

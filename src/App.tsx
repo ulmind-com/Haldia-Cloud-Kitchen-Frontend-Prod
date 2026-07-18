@@ -205,7 +205,7 @@ const AppContent = () => {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute adminOnly>
+            <ProtectedRoute staffOnly>
               <AdminDashboard />
             </ProtectedRoute>
           }

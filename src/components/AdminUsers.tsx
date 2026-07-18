@@ -5,7 +5,7 @@ import { useInfiniteList } from "@/hooks/useInfiniteList";
 import LoadMore from "@/components/LoadMore";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Trash2, Users, AlertTriangle, Phone, Mail, MapPin, Eye, X } from "lucide-react";
+import { Search, Trash2, Users, AlertTriangle, Phone, Mail, MapPin, Eye, X, UserPlus, Loader2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,6 +32,7 @@ const AdminUsers = () => {
   const [search, setSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [viewUser, setViewUser] = useState<any>(null);
+  const [addOpen, setAddOpen] = useState(false);
 
   const [debouncedSearch, setDebouncedSearch] = useState("");
   useEffect(() => {
@@ -77,14 +78,22 @@ const AdminUsers = () => {
           <h2 className="text-xl font-bold text-foreground">User Management</h2>
           <p className="text-sm text-muted-foreground">Manage roles, status, and access for all users</p>
         </div>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name or email…"
-            className="w-full rounded-xl border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:w-72"
-          />
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name or email…"
+              className="w-full rounded-xl border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:w-72"
+            />
+          </div>
+          <button
+            onClick={() => setAddOpen(true)}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow transition hover:brightness-110"
+          >
+            <UserPlus className="h-4 w-4" /> Add Staff
+          </button>
         </div>
       </div>
 
@@ -170,6 +179,7 @@ const AdminUsers = () => {
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="Customer">Customer</SelectItem>
+                                <SelectItem value="Manager">Manager</SelectItem>
                                 <SelectItem value="Admin">Admin</SelectItem>
                                 <SelectItem value="Delivery">Delivery</SelectItem>
                               </SelectContent>
@@ -310,6 +320,13 @@ const AdminUsers = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {addOpen && (
+        <AddStaffModal
+          onClose={() => setAddOpen(false)}
+          onSaved={() => { setAddOpen(false); queryClient.invalidateQueries({ queryKey: ["admin-users"] }); }}
+        />
+      )}
     </div>
   );
 };
@@ -338,5 +355,49 @@ const DetailRow = ({
     </p>
   </div>
 );
+
+const AddStaffModal = ({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) => {
+  const [form, setForm] = useState({ name: "", email: "", mobile: "", password: "", role: "Manager" });
+  const [saving, setSaving] = useState(false);
+  const inputClass = "w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20";
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await userApi.createUser(form);
+      toast.success(`${form.role} account created`);
+      onSaved();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Could not create user");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader><DialogTitle>Add Staff Member</DialogTitle></DialogHeader>
+        <form onSubmit={submit} className="mt-2 space-y-3">
+          <input required placeholder="Full name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inputClass} />
+          <input required type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} />
+          <input required placeholder="Mobile" value={form.mobile} onChange={(e) => setForm({ ...form, mobile: e.target.value })} className={inputClass} />
+          <input required type="password" minLength={6} placeholder="Password (min 6)" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className={inputClass} />
+          <div>
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">Role</label>
+            <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className={inputClass}>
+              <option value="Manager">Manager (full access, some admin-only actions restricted)</option>
+              <option value="Admin">Admin (full control)</option>
+            </select>
+          </div>
+          <button type="submit" disabled={saving} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-sm font-bold text-primary-foreground shadow hover:brightness-110 disabled:opacity-50">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />} Create account
+          </button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 export default AdminUsers;

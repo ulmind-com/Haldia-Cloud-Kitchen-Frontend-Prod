@@ -5,7 +5,7 @@ interface User {
   _id: string;
   name: string;
   email: string;
-  role: "user" | "admin" | "Customer" | "Admin";
+  role: "user" | "admin" | "Customer" | "Admin" | "Manager" | "manager";
   isCodDisabled?: boolean;
   mobile?: string;
   address?: string;
@@ -25,6 +25,8 @@ interface AuthState {
   closeAuthModal: () => void;
   isAuthenticated: () => boolean;
   isAdmin: () => boolean;
+  isManager: () => boolean;
+  isStaff: () => boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -58,6 +60,8 @@ export const useAuthStore = create<AuthState>()(
 
       isAuthenticated: () => !!get().token,
       isAdmin: () => get().user?.role === "admin" || get().user?.role === "Admin",
+      isManager: () => get().user?.role === "manager" || get().user?.role === "Manager",
+      isStaff: () => ["admin", "Admin", "manager", "Manager"].includes(get().user?.role || ""),
     }),
     {
       name: "swiggy-auth",

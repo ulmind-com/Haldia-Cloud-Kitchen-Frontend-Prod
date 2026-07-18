@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { adminApi, chatApi } from "@/api/axios";
+import { useAuthStore } from "@/store/useAuthStore";
 import { toast } from "sonner";
 import { socket } from "@/api/socket";
 import { playNewOrderSound, playChatSound } from "@/lib/notification-sound";
@@ -55,8 +56,13 @@ const sidebarLinks: { key: AdminTab; label: string; icon: any }[] = [
 
 // ... (statCards array stays same)
 
+// Tabs only an Admin may open (Managers get everything else).
+const ADMIN_ONLY_TABS: AdminTab[] = ["users"];
+
 const AdminDashboard = () => {
   const queryClient = useQueryClient();
+  const { isAdmin } = useAuthStore();
+  const visibleLinks = sidebarLinks.filter((l) => isAdmin() || !ADMIN_ONLY_TABS.includes(l.key));
   const [searchParams, setSearchParams] = useSearchParams();
   const tabFromUrl = searchParams.get("tab") as AdminTab | null;
   const activeTab: AdminTab = tabFromUrl && VALID_TABS.includes(tabFromUrl) ? tabFromUrl : "dashboard";
@@ -131,6 +137,15 @@ const AdminDashboard = () => {
   });
 
   const renderContent = () => {
+    // Managers cannot open admin-only tabs even via a direct URL.
+    if (ADMIN_ONLY_TABS.includes(activeTab) && !isAdmin()) {
+      return (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <h2 className="text-xl font-bold text-foreground">Admin access required</h2>
+          <p className="mt-1 text-sm text-muted-foreground">This section is restricted to administrators.</p>
+        </div>
+      );
+    }
     switch (activeTab) {
       case "dashboard":
         // ... (dashboard case)
@@ -261,7 +276,7 @@ const AdminDashboard = () => {
         </div>
 
         <nav className="flex-1 space-y-1 px-3">
-          {sidebarLinks.map((link) => {
+          {visibleLinks.map((link) => {
             const Icon = link.icon;
             const active = activeTab === link.key;
             return (
