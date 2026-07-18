@@ -256,3 +256,24 @@ export const vlogApi = {
   updateVlog: (id: string, data: any) => api.put(`/vlogs/${id}`, data),
   deleteVlog: (id: string) => api.delete(`/vlogs/${id}`),
 };
+
+// ─── POS: Tables & Sections ─────────────────────────────
+export const posApi = {
+  // Sections (table categories)
+  getSections: () => api.get("/pos/table-categories"),
+  createSection: (data: { name: string; description?: string; sortOrder?: number }) =>
+    api.post("/pos/table-categories", data),
+  updateSection: (id: string, data: { name?: string; description?: string; sortOrder?: number }) =>
+    api.put(`/pos/table-categories/${id}`, data),
+  deleteSection: (id: string) => api.delete(`/pos/table-categories/${id}`),
+
+  // Tables
+  getTables: (params?: { category?: string; status?: string }) => api.get("/pos/tables", { params }),
+  createTable: (data: { name: string; category: string; capacity?: number }) =>
+    api.post("/pos/tables", data),
+  updateTable: (id: string, data: { name?: string; category?: string; capacity?: number }) =>
+    api.put(`/pos/tables/${id}`, data),
+  deleteTable: (id: string) => api.delete(`/pos/tables/${id}`),
+  setTableStatus: (id: string, status: "available" | "occupied" | "dirty") =>
+    api.put(`/pos/tables/${id}/status`, { status }),
+};
