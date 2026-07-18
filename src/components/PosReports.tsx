@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { posApi } from "@/api/axios";
 import { useAuthStore } from "@/store/useAuthStore";
+import { downloadReportPdf, reportPdfBase64, reportFilename } from "@/lib/reportPdf";
 import { toast } from "sonner";
 import {
-  BarChart3, Mail, Loader2, Banknote, Smartphone, CreditCard, Store, Globe, Users, Receipt,
+  BarChart3, Mail, Loader2, Banknote, Smartphone, CreditCard, Store, Globe, Users, Receipt, FileDown,
 } from "lucide-react";
 
 const money = (n: number) => `₹${(n || 0).toFixed(2)}`;
@@ -35,18 +36,34 @@ const PosReports = () => {
     queryFn: async () => (await posApi.getReport(range)).data,
   });
 
+  const [generating, setGenerating] = useState(false);
+
+  // Generate = build & download a premium PDF of the (fresh) report.
   const generate = async () => {
-    const res = await refetch();
-    const r = res.data;
-    if (r) toast.success(`Report ready · ${r.offline.billCount} offline bill(s)`);
+    setGenerating(true);
+    try {
+      const res = await refetch();
+      const r = res.data;
+      if (!r) { toast.error("No report data"); return; }
+      downloadReportPdf(r, range.from, range.to);
+      toast.success("PDF report downloaded 📄");
+    } catch (e: any) {
+      toast.error("Could not generate PDF");
+    } finally {
+      setGenerating(false);
+    }
   };
 
+  // Send = email the SAME PDF as an attachment.
   const sendEmail = async () => {
     if (!email) { toast.error("Enter a recipient email"); return; }
     setSending(true);
     try {
-      const res = await posApi.emailReport({ ...range, email });
-      toast.success(res.data.message || "Report emailed");
+      let r = data;
+      if (!r) { const res = await refetch(); r = res.data; }
+      const pdfBase64 = r ? reportPdfBase64(r, range.from, range.to) : undefined;
+      const res = await posApi.emailReport({ ...range, email, pdfBase64, filename: reportFilename(range.from, range.to) });
+      toast.success(res.data.message || "Report emailed 📧");
     } catch (e: any) {
       toast.error(e?.response?.data?.message || "Could not email report");
     } finally {
@@ -78,8 +95,8 @@ const PosReports = () => {
           <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">To</label>
           <input type="date" value={to} min={from} max={todayStr()} onChange={(e) => setTo(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
         </div>
-        <button onClick={generate} disabled={isFetching} className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:brightness-110 disabled:opacity-60">
-          {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <BarChart3 className="h-4 w-4" />} Generate
+        <button onClick={generate} disabled={isFetching || generating} className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground hover:brightness-110 disabled:opacity-60">
+          {isFetching || generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />} Generate PDF
         </button>
         <div className="ml-auto flex items-end gap-2">
           <div>

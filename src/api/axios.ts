@@ -301,5 +301,5 @@ export const posApi = {
 
   // Reports
   getReport: (params: { from?: string; to?: string }) => api.get("/pos/report", { params }),
-  emailReport: (data: { from?: string; to?: string; email?: string }) => api.post("/pos/report/email", data),
+  emailReport: (data: { from?: string; to?: string; email?: string; pdfBase64?: string; filename?: string }) => api.post("/pos/report/email", data),
 };
