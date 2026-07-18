@@ -1,3 +1,24 @@
+// ── Shared, gesture-unlocked AudioContext ───────────────────────────────────
+// Browsers block audio until the user interacts with the page. Creating a fresh
+// AudioContext per sound leaves it "suspended" and nothing plays. Instead keep
+// one shared context and resume it on the first user gesture.
+let sharedCtx: AudioContext | null = null;
+function getSharedCtx(): AudioContext | null {
+    try {
+        if (!sharedCtx) sharedCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (sharedCtx.state === "suspended") sharedCtx.resume().catch(() => {});
+        return sharedCtx;
+    } catch {
+        return null;
+    }
+}
+if (typeof window !== "undefined") {
+    const unlock = () => { getSharedCtx(); };
+    ["click", "keydown", "touchstart", "pointerdown"].forEach((ev) =>
+        window.addEventListener(ev, unlock, { once: false, passive: true })
+    );
+}
+
 // De-duplicated new-order chime: the same order id won't chime twice even if
 // both the socket handler and the polling detector fire for it.
 let lastChimedOrderId: string | null = null;
@@ -13,7 +34,8 @@ export function chimeNewOrder(orderId?: string | null) {
  */
 export function playNewOrderSound() {
     try {
-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const ctx = getSharedCtx();
+        if (!ctx) return;
 
         // A loud, repeating siren-like alarm for a noisy kitchen
         // 32 beeps * 0.25s (0.15 + 0.1) = ~8 seconds long
@@ -45,7 +67,7 @@ export function playNewOrderSound() {
         }
 
         // Close context after sound finishes to free resources
-        setTimeout(() => ctx.close(), (beeps * (beepDuration + pauseDuration)) * 1000 + 500);
+        // shared context — not closed
     } catch (e) {
         console.warn("Could not play notification sound:", e);
     }
@@ -57,7 +79,8 @@ export function playNewOrderSound() {
  */
 export function playOrderPlacedSound() {
     try {
-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const ctx = getSharedCtx();
+        if (!ctx) return;
 
         // Major chord arpeggio (C6, E6, G6, C7)
         const notes = [
@@ -86,7 +109,7 @@ export function playOrderPlacedSound() {
             oscillator.stop(ctx.currentTime + start + duration + 0.1);
         });
 
-        setTimeout(() => ctx.close(), 2000);
+        // shared context — not closed
     } catch (e) {
         console.warn("Could not play success sound:", e);
     }
@@ -98,7 +121,8 @@ export function playOrderPlacedSound() {
  */
 export function playChatSound() {
     try {
-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const ctx = getSharedCtx();
+        if (!ctx) return;
         const sampleRate = ctx.sampleRate;
 
         // Render TWO bell notes (E5 → A5) directly into a buffer at ±1.0 amplitude.
@@ -143,7 +167,7 @@ export function playChatSound() {
         playAt(ctx.currentTime + totalDuration);
         playAt(ctx.currentTime + totalDuration * 2);
 
-        setTimeout(() => ctx.close(), (totalDuration * 3 + 0.5) * 1000);
+        // shared context — not closed
     } catch (e) {
         console.warn("Could not play chat sound:", e);
     }
