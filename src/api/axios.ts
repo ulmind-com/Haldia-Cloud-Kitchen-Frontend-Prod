@@ -299,7 +299,8 @@ export const posApi = {
   deleteBill: (id: string) => api.delete(`/pos/bills/${id}`),
   rejectBillDelete: (id: string) => api.put(`/pos/bills/${id}/reject-delete`),
 
-  // Reports
+  // Reports & dashboard
   getReport: (params: { from?: string; to?: string }) => api.get("/pos/report", { params }),
+  getPosDashboard: (params?: { from?: string; to?: string }) => api.get("/pos/dashboard", { params }),
   emailReport: (data: { from?: string; to?: string; email?: string; pdfBase64?: string; filename?: string }) => api.post("/pos/report/email", data),
 };
